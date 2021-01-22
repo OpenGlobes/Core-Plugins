@@ -25,4 +25,6 @@ public class GatewayStatus {
     public static int NEVER_CONNECTED = 0x1001;
     public static int CONNECTED = 0x1002;
     public static int DISCONNECTED = 0x1003;
+    public static int INTERNAL_MISSING_INFO = 0x2001;
+    public static int INTERNAL_COLLISION = 0x2002;
 }
