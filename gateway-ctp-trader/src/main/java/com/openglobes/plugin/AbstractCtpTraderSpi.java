@@ -201,8 +201,8 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     void doError(CThostFtdcRspInfoField info) {
         pool.submit(() -> {
             try {
-                gate.getHander().onException(new GatewayRuntimeException(info.getErrorID(),
-                                                                         info.getErrorMsg()));
+                gate.getHandler().onException(new GatewayRuntimeException(info.getErrorID(),
+                                                                          info.getErrorMsg()));
             } catch (Throwable ignored) {
             }
         });
@@ -212,13 +212,13 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                  CThostFtdcRspInfoField info) {
         pool.submit(() -> {
             try {
-                gate.getHander().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
-                                             new GatewayRuntimeException(info.getErrorID(),
+                gate.getHandler().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
+                                              new GatewayRuntimeException(info.getErrorID(),
                                                                          info.getErrorMsg()),
-                                             rsp.getRequestID());
+                                              rsp.getRequestID());
             } catch (Throwable th) {
-                gate.getHander().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                         th.getMessage()));
+                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                          th.getMessage()));
             }
         });
     }
@@ -227,13 +227,13 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                  CThostFtdcRspInfoField info) {
         pool.submit(() -> {
             try {
-                gate.getHander().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                             new GatewayRuntimeException(info.getErrorID(),
+                gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
+                                              new GatewayRuntimeException(info.getErrorID(),
                                                                          info.getErrorMsg()),
-                                             rsp.getRequestID());
+                                              rsp.getRequestID());
             } catch (Throwable th) {
-                gate.getHander().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                         th.getMessage()));
+                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                          th.getMessage()));
             }
         });
     }
@@ -243,13 +243,13 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                  int requestId) {
         pool.submit(() -> {
             try {
-                gate.getHander().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                             new GatewayRuntimeException(info.getErrorID(),
+                gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
+                                              new GatewayRuntimeException(info.getErrorID(),
                                                                          info.getErrorMsg()),
-                                             requestId);
+                                              requestId);
             } catch (Throwable th) {
-                gate.getHander().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                         th.getMessage()));
+                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                          th.getMessage()));
             }
         });
     }
@@ -273,10 +273,10 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                 r.setTraderId(q.getTraderId());
                 r.setTradingDay(LocalDate.parse(order.getTradingDay(),
                                                 dayFormatter));
-                gate.getHander().onResponse(r);
+                gate.getHandler().onResponse(r);
             } catch (Throwable th) {
-                gate.getHander().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                         th.getMessage()));
+                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                          th.getMessage()));
             }
         });
     }
@@ -300,10 +300,10 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                 t.setTraderId(q.getTraderId());
                 t.setTradingDay(LocalDate.parse(trade.getTradingDay(),
                                                 dayFormatter));
-                gate.getHander().onTrade(t);
+                gate.getHandler().onTrade(t);
             } catch (Throwable th) {
-                gate.getHander().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                         th.getMessage()));
+                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                          th.getMessage()));
             }
         });
     }
@@ -488,7 +488,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         this.status.set(status);
         pool.submit(() -> {
             try {
-                gate.getHander().onStatusChange(new ServiceRuntimeStatus(status, msg));
+                gate.getHandler().onStatusChange(new ServiceRuntimeStatus(status, msg));
             } catch (Throwable ignored) {
             }
         });

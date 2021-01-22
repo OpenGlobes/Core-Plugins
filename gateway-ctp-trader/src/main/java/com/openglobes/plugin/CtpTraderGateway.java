@@ -32,15 +32,16 @@ import org.ctp4j.THOST_TE_RESUME_TYPE;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class CtpTraderGateway implements ITraderGateway, Runnable {
+public class CtpTraderGateway implements ITraderGateway,
+                                         Runnable {
 
-    private final Thread              connectThread;
+    private final Thread              connThd;
     private final CtpTraderSpi        spi;
     private       CThostFtdcTraderApi api;
 
     public CtpTraderGateway() {
-        spi           = new CtpTraderSpi(this);
-        connectThread = new Thread(this);
+        spi     = new CtpTraderSpi(this);
+        connThd = new Thread(this);
     }
 
     @Override
@@ -184,14 +185,14 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
         });
         api.SubscribePrivateTopic(THOST_TE_RESUME_TYPE.THOST_TERT_RESUME);
         api.SubscribePublicTopic(THOST_TE_RESUME_TYPE.THOST_TERT_RESUME);
-        connectThread.start();
+        connThd.start();
     }
 
     private void terminateThread() throws GatewayException {
-        if (connectThread.isAlive()) {
-            connectThread.interrupt();
+        if (connThd.isAlive()) {
+            connThd.interrupt();
             try {
-                connectThread.join(1000);
+                connThd.join(1000);
             } catch (InterruptedException ex) {
                 throw new GatewayException(null,
                                            ex.getMessage(),
@@ -204,7 +205,7 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
         return api;
     }
 
-    ITraderGatewayHandler getHander() {
+    ITraderGatewayHandler getHandler() {
         return spi.getHandler();
     }
 }
