@@ -27,6 +27,7 @@ import com.openglobes.core.trader.Trade;
 import org.ctp4j.ThostFtdcCtpApi;
 import org.junit.jupiter.api.*;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -38,7 +39,12 @@ class CtpTraderGatewayTest {
 
     @BeforeEach
     void setUp() {
-        var ignored = ThostFtdcCtpApi.INSTALL;
+        try {
+            ThostFtdcCtpApi.install();
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @AfterEach
