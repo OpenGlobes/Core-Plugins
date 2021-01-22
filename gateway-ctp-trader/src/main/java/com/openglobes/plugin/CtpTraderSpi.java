@@ -16,6 +16,17 @@
  */
 package com.openglobes.plugin;
 
+import org.ctp4j.CThostFtdcInputOrderActionField;
+import org.ctp4j.CThostFtdcInputOrderField;
+import org.ctp4j.CThostFtdcOrderActionField;
+import org.ctp4j.CThostFtdcOrderField;
+import org.ctp4j.CThostFtdcRspAuthenticateField;
+import org.ctp4j.CThostFtdcRspInfoField;
+import org.ctp4j.CThostFtdcRspUserLoginField;
+import org.ctp4j.CThostFtdcSettlementInfoConfirmField;
+import org.ctp4j.CThostFtdcTradeField;
+import org.ctp4j.CThostFtdcUserLogoutField;
+
 /**
  *
  * @author Hongbao Chen
@@ -25,6 +36,146 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
 
     CtpTraderSpi(CtpTraderGateway gateway) {
         super(gateway);
+    }
+
+    @Override
+    public void OnErrRtnOrderAction(CThostFtdcOrderActionField rsp,
+                                    CThostFtdcRspInfoField info) {
+        doError(rsp,
+                info);
+    }
+
+    @Override
+    public void OnErrRtnOrderInsert(CThostFtdcInputOrderField rsp,
+                                    CThostFtdcRspInfoField info) {
+        doError(rsp,
+                info);
+    }
+
+    @Override
+    public void OnFrontConnected() {
+        setStatus(GatewayStatus.CONNECTED,
+                  "Connected.");
+    }
+
+    @Override
+    public void OnFrontDisconnected(int nReason) {
+        setStatus(GatewayStatus.DISCONNECTED,
+                  "Disconnected(" + nReason + ").");
+    }
+
+    @Override
+    public void OnRspAuthenticate(CThostFtdcRspAuthenticateField rsp,
+                                  CThostFtdcRspInfoField info,
+                                  int requestId,
+                                  boolean isLast) {
+        if (info == null) {
+            return;
+        }
+        if (info.getErrorID() != 0) {
+            setStatus(GatewayStatus.AUTHENTICATE_FAIL,
+                      info.getErrorMsg());
+            doError(info);
+        }
+        else {
+            setStatus(GatewayStatus.AUTHENTICATED,
+                      info.getErrorMsg());
+            apiLogin();
+        }
+    }
+
+    @Override
+    public void OnRspError(CThostFtdcRspInfoField info,
+                           int requestId,
+                           boolean isLast) {
+    }
+
+    @Override
+    public void OnRspOrderAction(CThostFtdcInputOrderActionField rsp,
+                                 CThostFtdcRspInfoField info,
+                                 int requestId,
+                                 boolean isLast) {
+        doError(rsp,
+                info,
+                requestId);
+    }
+
+    @Override
+    public void OnRspOrderInsert(CThostFtdcInputOrderField rsp,
+                                 CThostFtdcRspInfoField info,
+                                 int requestId,
+                                 boolean isLast) {
+        doError(rsp,
+                info);
+    }
+
+    @Override
+    public void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField rsp,
+                                           CThostFtdcRspInfoField info,
+                                           int requestId,
+                                           boolean isLast) {
+        if (info == null) {
+            return;
+        }
+        if (info.getErrorID() != 0) {
+            setStatus(GatewayStatus.CONFIRM_FAIL,
+                      info.getErrorMsg());
+            doError(info);
+        }
+        else {
+            setStatus(GatewayStatus.NO_ERROR,
+                      info.getErrorMsg());
+        }
+    }
+
+    @Override
+    public void OnRspUserLogin(CThostFtdcRspUserLoginField rsp,
+                               CThostFtdcRspInfoField info,
+                               int requestId,
+                               boolean isLast) {
+        if (info == null) {
+            return;
+        }
+        if (info.getErrorID() != 0) {
+            setStatus(GatewayStatus.LOGIN_FAIL,
+                      info.getErrorMsg());
+            doError(info);
+        }
+        else {
+            setStatus(GatewayStatus.LOGINED,
+                      info.getErrorMsg());
+            setInfo(rsp);
+            apiConfirmSettlement();
+        }
+    }
+
+    @Override
+    public void OnRspUserLogout(CThostFtdcUserLogoutField rsp,
+                                CThostFtdcRspInfoField info,
+                                int requestId,
+                                boolean isLast) {
+        if (info == null) {
+            return;
+        }
+        if (info.getErrorID() != 0) {
+            setStatus(GatewayStatus.LOGOUT_FAIL,
+                      info.getErrorMsg());
+            doError(info);
+        }
+        else {
+            setStatus(GatewayStatus.LOGOUT,
+                      info.getErrorMsg());
+        }
+    }
+
+    @Override
+    public void OnRtnOrder(CThostFtdcOrderField order) {
+        doOrder(order);
+    }
+
+    @Override
+    public void OnRtnTrade(CThostFtdcTradeField trade) {
+        doTrade(trade);
     }
 
 }
