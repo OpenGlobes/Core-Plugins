@@ -55,6 +55,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
     public void OnFrontConnected() {
         setStatus(GatewayStatus.CONNECTED,
                   "Connected.");
+        apiAuthenticate();
     }
 
     @Override

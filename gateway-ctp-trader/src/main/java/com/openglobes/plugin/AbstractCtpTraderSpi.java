@@ -329,7 +329,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         props.entrySet().forEach(entry -> {
             String key = (String) entry.getKey();
             if (key.startsWith("Front.")) {
-                r.add((String) entry.getKey());
+                r.add((String) entry.getValue());
             }
         });
         return r;
