@@ -28,7 +28,6 @@ import org.ctp4j.CThostFtdcTradeField;
 import org.ctp4j.CThostFtdcUserLogoutField;
 
 /**
- *
  * @author Hongbao Chen
  * @since 1.0
  */
@@ -76,8 +75,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             setStatus(GatewayStatus.AUTHENTICATE_FAIL,
                       info.getErrorMsg());
             doError(info);
-        }
-        else {
+        } else {
             setStatus(GatewayStatus.AUTHENTICATED,
                       info.getErrorMsg());
             apiLogin();
@@ -121,8 +119,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             setStatus(GatewayStatus.CONFIRM_FAIL,
                       info.getErrorMsg());
             doError(info);
-        }
-        else {
+        } else {
             setStatus(GatewayStatus.NO_ERROR,
                       info.getErrorMsg());
         }
@@ -140,9 +137,8 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             setStatus(GatewayStatus.LOGIN_FAIL,
                       info.getErrorMsg());
             doError(info);
-        }
-        else {
-            setStatus(GatewayStatus.LOGINED,
+        } else {
+            setStatus(GatewayStatus.LOGIN,
                       info.getErrorMsg());
             setInfo(rsp);
             apiConfirmSettlement();
@@ -161,8 +157,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             setStatus(GatewayStatus.LOGOUT_FAIL,
                       info.getErrorMsg());
             doError(info);
-        }
-        else {
+        } else {
             setStatus(GatewayStatus.LOGOUT,
                       info.getErrorMsg());
         }

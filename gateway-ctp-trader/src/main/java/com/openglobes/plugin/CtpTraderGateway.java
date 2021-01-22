@@ -22,23 +22,24 @@ import com.openglobes.core.trader.ITraderGateway;
 import com.openglobes.core.trader.ITraderGatewayHandler;
 import com.openglobes.core.trader.Request;
 import com.openglobes.core.trader.TraderGatewayInfo;
+
 import java.util.Properties;
+
 import org.ctp4j.CThostFtdcTraderApi;
 import org.ctp4j.THOST_TE_RESUME_TYPE;
 
 /**
- *
  * @author Hongbao Chen
  * @since 1.0
  */
 public class CtpTraderGateway implements ITraderGateway, Runnable {
 
-    private CThostFtdcTraderApi api;
-    private final Thread connectThread;
-    private final CtpTraderSpi spi;
+    private final Thread              connectThread;
+    private final CtpTraderSpi        spi;
+    private       CThostFtdcTraderApi api;
 
     public CtpTraderGateway() {
-        spi = new CtpTraderSpi(this);
+        spi           = new CtpTraderSpi(this);
         connectThread = new Thread(this);
     }
 
@@ -96,8 +97,7 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
             api.Init();
             try {
                 Thread.sleep(1000);
-            }
-            catch (InterruptedException ignored) {
+            } catch (InterruptedException ignored) {
             }
         }
     }
@@ -108,7 +108,7 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
      * This method only initiates a connection to the remote server and it
      * doesn't guarantee the successful response from the remote. To make sure
      * its connection succeeds, to inspect it current status, call
-     * {@link getStatus()} or override
+     * {@link ITraderGateway#getStatus()} or override
      * {@link ITraderGatewayHandler#onStatusChange}.
      * <p>
      * The following values must be set in properties:
@@ -130,32 +130,31 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
      * <pre>{@code
      *      var properties = new Properties();
      *      // Set authentication information.
-     *      properties.put("AppId", 
+     *      properties.put("AppId",
      *                     "my app id");
-     *      properties.put("AuthCode", 
+     *      properties.put("AuthCode",
      *                     "my auth code");
      *      // Set account login information.
-     *      properties.put("BrokerId", 
+     *      properties.put("BrokerId",
      *                     "my broker id");
-     *      properties.put("UserId", 
+     *      properties.put("UserId",
      *                     "my user id");
-     *      properties.put("Password", 
+     *      properties.put("Password",
      *                     "my password");
      *      // Set flow cache path.
-     *      properties.put("FlowPath", 
+     *      properties.put("FlowPath",
      *                     "my flow path");
      *      // Set connected front addresses.
-     *      properties.put("Front.1", 
+     *      properties.put("Front.1",
      *                     "tcp://127.0.0.1:9090");
-     *      properties.put("Front.2", 
+     *      properties.put("Front.2",
      *                     "tcp://127.0.0.1:9090");
-     *      api.start(properties, 
+     *      api.start(properties,
      *                myGatewayHandler);
      * }</pre>
      *
      * @param properties properties for the gateway to run with.
      * @param handler    gateway handler for remote responses.
-     *
      * @throws GatewayException thrown when it fails to initialize the client.
      */
     @Override
@@ -193,8 +192,7 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
             connectThread.interrupt();
             try {
                 connectThread.join(1000);
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 throw new GatewayException(null,
                                            ex.getMessage(),
                                            ex);

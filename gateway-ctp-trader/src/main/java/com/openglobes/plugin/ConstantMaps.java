@@ -17,19 +17,18 @@
 package com.openglobes.plugin;
 
 import com.openglobes.core.GatewayException;
-import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.trader.Direction;
 import com.openglobes.core.trader.Offset;
 import com.openglobes.core.trader.OrderStatus;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
  * @author Hongbao Chen
  * @since 1.0
  */
 public class ConstantMaps {
+
+    private ConstantMaps() {
+    }
 
     public static Character getDestinatedDirection(Integer localDirection) throws GatewayException {
         switch (localDirection) {
@@ -38,7 +37,7 @@ public class ConstantMaps {
             case Direction.SELL:
                 return '1';
             default:
-                throw new GatewayException(GatewayStatus.INTERNAL_MISSING_INFO,
+                throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
                                            "Unknown local direction " + localDirection + ".");
         }
     }
@@ -52,7 +51,7 @@ public class ConstantMaps {
             case Offset.CLOSE_TODAY:
                 return '3';
             default:
-                throw new GatewayException(GatewayStatus.INTERNAL_MISSING_INFO,
+                throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
                                            "Unknown local offset " + localOffset + ".");
         }
     }
@@ -71,8 +70,5 @@ public class ConstantMaps {
             default:
                 return OrderStatus.DELETED;
         }
-    }
-
-    private ConstantMaps() {
     }
 }

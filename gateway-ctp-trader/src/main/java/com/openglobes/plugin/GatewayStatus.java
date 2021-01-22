@@ -17,24 +17,23 @@
 package com.openglobes.plugin;
 
 /**
- *
  * @author Hongbao Chen
  * @since 1.0
  */
 public class GatewayStatus {
 
-    public static int NO_ERROR = 0;
-    public static int NEVER_CONNECTED = 0x1001;
-    public static int CONNECTED = 0x1002;
-    public static int DISCONNECTED = 0x1003;
-    public static int AUTHENTICATED = 0x1004;
-    public static int AUTHENTICATE_FAIL = 0x1005;
-    public static int LOGINED = 0x1006;
-    public static int LOGIN_FAIL = 0x1007;
-    public static int CONFIRM_FAIL = 0x1008;
-    public static int LOGOUT = 0x1009;
-    public static int LOGOUT_FAIL = 0x100A;
-    public static int INTERNAL_MISSING_INFO = 0x2001;
+    public static int NO_ERROR           = 0;
+    public static int NEVER_CONNECTED    = 0x1001;
+    public static int CONNECTED          = 0x1002;
+    public static int DISCONNECTED       = 0x1003;
+    public static int AUTHENTICATED      = 0x1004;
+    public static int AUTHENTICATE_FAIL  = 0x1005;
+    public static int LOGIN              = 0x1006;
+    public static int LOGIN_FAIL         = 0x1007;
+    public static int CONFIRM_FAIL       = 0x1008;
+    public static int LOGOUT             = 0x1009;
+    public static int LOGOUT_FAIL        = 0x100A;
+    public static int INTERNAL_MISSED    = 0x2001;
     public static int INTERNAL_COLLISION = 0x2002;
-    public static int INTERNAL_UNCAUGHT_EXCEPTION = 0x2003;
+    public static int INTERNAL_UNCAUGHT  = 0x2003;
 }
