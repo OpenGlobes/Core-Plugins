@@ -16,6 +16,11 @@
  */
 package com.openglobes.plugin;
 
+import com.openglobes.core.GatewayException;
+import com.openglobes.core.GatewayRuntimeException;
+import com.openglobes.core.trader.Direction;
+import com.openglobes.core.trader.Offset;
+import com.openglobes.core.trader.OrderStatus;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,36 +31,46 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConstantMaps {
 
-    private final static Map<Integer, Character> directions = new ConcurrentHashMap<>(4);
-    private final static Map<Character, Integer> directions2 = new ConcurrentHashMap<>(4);
-    private final static Map<Integer, Character> offsets = new ConcurrentHashMap<>(4);
-    private final static Map<Character, Integer> offsets2 = new ConcurrentHashMap<>(4);
-    private final static Map<Integer, Character> orderStatuses = new ConcurrentHashMap<>(8);
-    private final static Map<Character, Integer> orderStatuses2 = new ConcurrentHashMap<>(8);
-
-    public static Character getDestinatedDirection(Integer localDirection) {
-        return directions.get(localDirection);
+    public static Character getDestinatedDirection(Integer localDirection) throws GatewayException {
+        switch (localDirection) {
+            case Direction.BUY:
+                return '0';
+            case Direction.SELL:
+                return '1';
+            default:
+                throw new GatewayException(GatewayStatus.INTERNAL_MISSING_INFO,
+                                           "Unknown local direction " + localDirection + ".");
+        }
     }
 
-    // TODO initialize offsets and directions
-    public static Character getDestinatedOffset(Integer localOffset) {
-        return offsets.get(localOffset);
+    public static Character getDestinatedOffset(Integer localOffset) throws GatewayException {
+        switch (localOffset) {
+            case Offset.OPEN:
+                return '0';
+            case Offset.CLOSE:
+                return '1';
+            case Offset.CLOSE_TODAY:
+                return '3';
+            default:
+                throw new GatewayException(GatewayStatus.INTERNAL_MISSING_INFO,
+                                           "Unknown local offset " + localOffset + ".");
+        }
     }
 
-    public static Integer getLocalDirection(Character destinatedDirection) {
-        return directions2.get(destinatedDirection);
-    }
-
-    public static Integer getLocalOffset(Character destinatedOffset) {
-        return offsets2.get(destinatedOffset);
-    }
-    
-    public static Character getDestinatedOrderStatus(Integer localOrderStatus) {
-        return orderStatuses.get(localOrderStatus);
-    }
-    
     public static Integer getLocalOrderStatus(Character destinatedOrderStatus) {
-        return orderStatuses2.get(destinatedOrderStatus);
+        switch (destinatedOrderStatus) {
+            case '0':
+                return OrderStatus.ALL_TRADED;
+            case '1':
+                return OrderStatus.QUEUED;
+            case '3':
+                return OrderStatus.ACCEPTED;
+            case '2':
+            case '4':
+                return OrderStatus.UNQUEUED;
+            default:
+                return OrderStatus.DELETED;
+        }
     }
 
     private ConstantMaps() {
