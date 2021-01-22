@@ -25,13 +25,19 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.ctp4j.CThostFtdcInputOrderActionField;
 import org.ctp4j.CThostFtdcInputOrderField;
+import org.ctp4j.CThostFtdcReqAuthenticateField;
+import org.ctp4j.CThostFtdcReqUserLoginField;
+import org.ctp4j.CThostFtdcSettlementInfoConfirmField;
 import org.ctp4j.CThostFtdcTraderSpi;
+import org.ctp4j.CThostFtdcUserLogoutField;
 
 /**
  *
@@ -55,6 +61,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     private final ExecutorService pool;
     private final Properties props;
     private final Map<String, Long> refOrderId;
+    private final AtomicInteger requestId;
     private final AtomicInteger status;
 
     public AbstractCtpTraderSpi(CtpTraderGateway gateway) {
@@ -66,26 +73,61 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         refOrderId = new ConcurrentHashMap<>(1024);
         orderIdSysId = new ConcurrentHashMap<>(1024);
         curOrderRef = new AtomicInteger(0);
+        requestId = new AtomicInteger(0);
+    }
+
+    private int nextRequestId() {
+        return requestId.incrementAndGet();
     }
 
     int apiAuthenticate() {
-        // TODO authenticate
-        return 0;
+        var r = new CThostFtdcReqAuthenticateField();
+        r.setAppID(getAppId());
+        r.setAuthCode(getAuthCode());
+        r.setBrokerID(getBrokerId());
+        r.setUserID(getUserId());
+        r.setUserProductInfo("COREBOT");
+        return gate.getApi().ReqAuthenticate(r,
+                                             nextRequestId());
     }
 
     int apiConfirmSettlement() {
-        // TODO confirm settlement
-        return 0;
+        var r = new CThostFtdcSettlementInfoConfirmField();
+        r.setAccountID("");
+        r.setBrokerID(getBrokerId());
+        r.setConfirmDate("");
+        r.setConfirmTime("");
+        r.setCurrencyID("CNY");
+        r.setInvestorID(getUserId());
+        r.setSettlementID(0);
+        return gate.getApi().ReqSettlementInfoConfirm(r,
+                                                      nextRequestId());
     }
 
     int apiLogin() {
-        // TODO login
-        return 0;
+        var r = new CThostFtdcReqUserLoginField();
+        r.setBrokerID(getBrokerId());
+        r.setClientIPAddress("");
+        r.setClientIPPort(0);
+        r.setInterfaceProductInfo("");
+        r.setLoginRemark("");
+        r.setMacAddress("");
+        r.setOneTimePassword("");
+        r.setPassword(getPassword());
+        r.setProtocolInfo("");
+        r.setTradingDay("");
+        r.setUserID(getUserId());
+        r.setUserProductInfo("");
+        return gate.getApi().ReqUserLogin(r,
+                                          nextRequestId());
     }
 
     int apiLogout() {
-        // TODO logout
-        return 0;
+        var r = new CThostFtdcUserLogoutField();
+        r.setBrokerID(getBrokerId());
+        r.setUserID(getUserId());
+        return gate.getApi().ReqUserLogout(r,
+                                           nextRequestId());
     }
 
     int deleteOrder(Request request,

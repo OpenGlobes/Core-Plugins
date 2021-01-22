@@ -26,9 +26,5 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
     CtpTraderSpi(CtpTraderGateway gateway) {
         super(gateway);
     }
-    
-    
-
-
 
 }
