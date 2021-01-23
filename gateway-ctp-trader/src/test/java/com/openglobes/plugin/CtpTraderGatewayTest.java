@@ -53,6 +53,7 @@ class CtpTraderGatewayTest {
 
     @Test
     @Order(0)
+    @Disabled
     @DisplayName("ITraderGateway::start()")
     public void start() {
         var gate  = new CtpTraderGateway();
