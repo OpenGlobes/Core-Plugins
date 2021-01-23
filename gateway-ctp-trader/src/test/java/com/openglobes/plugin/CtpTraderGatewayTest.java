@@ -72,7 +72,7 @@ class CtpTraderGatewayTest {
                   "chb_1987_1013");
         // Set flow cache path.
         props.put("FlowPath",
-                  "C:\\Users\\chenh\\Desktop\\gateway");
+                  "C:\\Users\\chenh\\Desktop\\gateway\\");
         // Set connected front addresses.
         props.put("Front.1",
                   "tcp://180.168.146.187:10101");
