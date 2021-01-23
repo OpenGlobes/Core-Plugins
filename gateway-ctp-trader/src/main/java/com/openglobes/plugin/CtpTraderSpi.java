@@ -16,16 +16,7 @@
  */
 package com.openglobes.plugin;
 
-import org.ctp4j.CThostFtdcInputOrderActionField;
-import org.ctp4j.CThostFtdcInputOrderField;
-import org.ctp4j.CThostFtdcOrderActionField;
-import org.ctp4j.CThostFtdcOrderField;
-import org.ctp4j.CThostFtdcRspAuthenticateField;
-import org.ctp4j.CThostFtdcRspInfoField;
-import org.ctp4j.CThostFtdcRspUserLoginField;
-import org.ctp4j.CThostFtdcSettlementInfoConfirmField;
-import org.ctp4j.CThostFtdcTradeField;
-import org.ctp4j.CThostFtdcUserLogoutField;
+import org.ctp4j.*;
 
 /**
  * @author Hongbao Chen

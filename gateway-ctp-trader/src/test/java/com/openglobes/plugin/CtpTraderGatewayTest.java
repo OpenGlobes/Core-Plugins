@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("CTP Gateway")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

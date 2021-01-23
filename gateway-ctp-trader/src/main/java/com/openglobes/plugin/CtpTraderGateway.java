@@ -17,16 +17,11 @@
 package com.openglobes.plugin;
 
 import com.openglobes.core.GatewayException;
-import com.openglobes.core.trader.ActionType;
-import com.openglobes.core.trader.ITraderGateway;
-import com.openglobes.core.trader.ITraderGatewayHandler;
-import com.openglobes.core.trader.Request;
-import com.openglobes.core.trader.TraderGatewayInfo;
-
-import java.util.Properties;
-
+import com.openglobes.core.trader.*;
 import org.ctp4j.CThostFtdcTraderApi;
 import org.ctp4j.THOST_TE_RESUME_TYPE;
+
+import java.util.Properties;
 
 /**
  * @author Hongbao Chen

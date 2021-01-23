@@ -19,12 +19,9 @@ package com.openglobes.plugin;
 import com.openglobes.core.GatewayException;
 import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.ServiceRuntimeStatus;
-import com.openglobes.core.trader.ITraderGatewayHandler;
-import com.openglobes.core.trader.Request;
-import com.openglobes.core.trader.Response;
-import com.openglobes.core.trader.Trade;
-import com.openglobes.core.trader.TraderGatewayInfo;
+import com.openglobes.core.trader.*;
 import com.openglobes.core.utils.Utils;
+import org.ctp4j.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,19 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.ctp4j.CThostFtdcInputOrderActionField;
-import org.ctp4j.CThostFtdcInputOrderField;
-import org.ctp4j.CThostFtdcOrderActionField;
-import org.ctp4j.CThostFtdcOrderField;
-import org.ctp4j.CThostFtdcReqAuthenticateField;
-import org.ctp4j.CThostFtdcReqUserLoginField;
-import org.ctp4j.CThostFtdcRspInfoField;
-import org.ctp4j.CThostFtdcRspUserLoginField;
-import org.ctp4j.CThostFtdcSettlementInfoConfirmField;
-import org.ctp4j.CThostFtdcTradeField;
-import org.ctp4j.CThostFtdcTraderSpi;
-import org.ctp4j.CThostFtdcUserLogoutField;
 
 /**
  * @author Hongbao Chen
@@ -214,7 +198,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
             try {
                 gate.getHandler().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
                                               new GatewayRuntimeException(info.getErrorID(),
-                                                                         info.getErrorMsg()),
+                                                                          info.getErrorMsg()),
                                               rsp.getRequestID());
             } catch (Throwable th) {
                 gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
@@ -229,7 +213,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
             try {
                 gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
                                               new GatewayRuntimeException(info.getErrorID(),
-                                                                         info.getErrorMsg()),
+                                                                          info.getErrorMsg()),
                                               rsp.getRequestID());
             } catch (Throwable th) {
                 gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
@@ -245,7 +229,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
             try {
                 gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
                                               new GatewayRuntimeException(info.getErrorID(),
-                                                                         info.getErrorMsg()),
+                                                                          info.getErrorMsg()),
                                               requestId);
             } catch (Throwable th) {
                 gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
