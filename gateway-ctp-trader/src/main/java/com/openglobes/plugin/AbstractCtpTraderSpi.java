@@ -74,7 +74,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         requestId     = new AtomicInteger(0);
         requests      = new ConcurrentHashMap<>(1024);
         dayFormatter  = DateTimeFormatter.ofPattern("yyyyMMdd");
-        timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss");
+        timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     }
 
     private void clearObsoletedCache() {
@@ -441,7 +441,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         var ref = Integer.toString(curOrderRef.incrementAndGet());
         if (refOrderId.containsKey(ref)) {
             throw new GatewayException(GatewayStatus.INTERNAL_COLLISION,
-                                       "Duplciated order reference " + ref + ".");
+                                       "Duplicated order reference " + ref + ".");
         }
         refOrderId.put(ref,
                        orderId);

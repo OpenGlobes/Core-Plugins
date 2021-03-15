@@ -79,7 +79,6 @@ class CtpTraderGatewayTest {
                   "tcp://180.168.146.187:10101");
         final var latch = new CountDownLatch(1);
         try {
-            gate.setProperties(props);
             gate.setHandler(new ITraderGatewayHandler() {
                 private final String exchangeId = "DEC";
                 private Long requestId = 0L;
@@ -154,7 +153,7 @@ class CtpTraderGatewayTest {
                     }
                 }
             });
-            gate.start();
+            gate.start(props);
             latch.await();
         } catch (GatewayException | InterruptedException e) {
             e.printStackTrace();
