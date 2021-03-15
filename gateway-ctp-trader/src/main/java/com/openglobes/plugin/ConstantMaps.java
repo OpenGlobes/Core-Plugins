@@ -46,10 +46,12 @@ public class ConstantMaps {
         switch (localOffset) {
             case Offset.OPEN:
                 return '0';
-            case Offset.CLOSE:
+            case Offset.CLOSE_AUTO:
                 return '1';
             case Offset.CLOSE_TODAY:
                 return '3';
+            case Offset.CLOSE_YD:
+                return '4';
             default:
                 throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
                                            "Unknown local offset " + localOffset + ".");

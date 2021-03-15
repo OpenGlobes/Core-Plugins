@@ -20,14 +20,14 @@ package com.openglobes.plugin;
 import com.openglobes.core.GatewayException;
 import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.ServiceRuntimeStatus;
-import com.openglobes.core.trader.ITraderGatewayHandler;
-import com.openglobes.core.trader.Request;
-import com.openglobes.core.trader.Response;
-import com.openglobes.core.trader.Trade;
+import com.openglobes.core.trader.*;
 import org.ctp4j.ThostFtdcCtpApi;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Order;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.time.ZonedDateTime;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -53,7 +53,7 @@ class CtpTraderGatewayTest {
 
     @Test
     @Order(0)
-    @Disabled
+    //@Disabled
     @DisplayName("ITraderGateway::start()")
     public void start() {
         var gate  = new CtpTraderGateway();
@@ -77,12 +77,39 @@ class CtpTraderGatewayTest {
         // Set connected front addresses.
         props.put("Front.1",
                   "tcp://180.168.146.187:10101");
-
+        final var latch = new CountDownLatch(1);
         try {
-            gate.start(props, new ITraderGatewayHandler() {
+            gate.setProperties(props);
+            gate.setHandler(new ITraderGatewayHandler() {
+                private final String exchangeId = "DEC";
+                private Long requestId = 0L;
+                private Long orderId = 0L;
                 @Override
                 public void onTrade(Trade trade) {
                     System.out.println(Utils.jsonify(trade));
+                    if (trade.getOffset() != Offset.OPEN) {
+                        latch.countDown();
+                        return;
+                    }
+                    var r = new Request();
+                    r.setAction(ActionType.NEW);
+                    r.setDirection(trade.getDirection() == Direction.BUY ? Direction.SELL : Direction.BUY);
+                    r.setTraderId(trade.getTraderId());
+                    r.setOffset(Offset.CLOSE_TODAY);
+                    r.setInstrumentId(trade.getInstrumentId());
+                    r.setExchangeId(exchangeId);
+                    r.setOrderId(++orderId);
+                    r.setPrice(r.getDirection() == Direction.BUY ? trade.getPrice() + 5 : trade.getPrice() - 5);
+                    r.setQuantity(1L);
+                    r.setRequestId(++requestId);
+                    r.setSignature(String.valueOf(r.hashCode()));
+                    r.setTag("unit_test");
+                    r.setUpdateTimestamp(ZonedDateTime.now());
+                    try {
+                        gate.insert(r, requestId);
+                    } catch (GatewayException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 @Override
@@ -104,10 +131,31 @@ class CtpTraderGatewayTest {
                 @Override
                 public void onStatusChange(ServiceRuntimeStatus serviceRuntimeStatus) {
                     System.out.println(Utils.jsonify(serviceRuntimeStatus));
+                    if (serviceRuntimeStatus.getCode() == GatewayStatus.CONFIRMED) {
+                        var r = new Request();
+                        r.setAction(ActionType.NEW);
+                        r.setDirection(Direction.BUY);
+                        r.setTraderId(0);
+                        r.setOffset(Offset.OPEN);
+                        r.setInstrumentId("c2109");
+                        r.setExchangeId(exchangeId);
+                        r.setOrderId(++orderId);
+                        r.setPrice(2700D);
+                        r.setQuantity(1L);
+                        r.setRequestId(++requestId);
+                        r.setSignature(String.valueOf(r.hashCode()));
+                        r.setTag("unit_test");
+                        r.setUpdateTimestamp(ZonedDateTime.now());
+                        try {
+                            gate.insert(r, requestId);
+                        } catch (GatewayException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
-
-            new CountDownLatch(1).await();
+            gate.start();
+            latch.await();
         } catch (GatewayException | InterruptedException e) {
             e.printStackTrace();
             fail(e.getMessage());

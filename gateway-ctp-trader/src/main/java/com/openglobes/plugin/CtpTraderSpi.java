@@ -112,7 +112,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
                       info.getErrorMsg());
             doError(info);
         } else {
-            setStatus(GatewayStatus.NO_ERROR,
+            setStatus(GatewayStatus.CONFIRMED,
                       info.getErrorMsg());
         }
     }

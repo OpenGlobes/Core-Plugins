@@ -54,6 +54,68 @@ public class CtpTraderGateway implements ITraderGateway,
         return spi.getStatus();
     }
 
+    /**
+     * @param handler gateway handler for remote responses.
+     * @throws GatewayException
+     */
+    @Override
+    public void setHandler(ITraderGatewayHandler handler) throws GatewayException {
+        spi.setHandler(handler);
+    }
+
+    /**
+     * Set properties for the gateway.
+     * <p>
+     * The following values must be set in properties:
+     * <ul>
+     * <li><b>AppId</b>: application ID for your client.
+     * <li><b>AuthCode</b>: authcentication code for your client.
+     * <li><b>BrokerId</b>: broker ID for your account.
+     * <li><b>UserId</b>: user ID for your account.
+     * <li><b>Password</b>: password for your account.
+     * <li><b>FlowPath</b>: flow path on your disk to keep sessional
+     * information.
+     * <li><b>Front.front-id</b>: front address to connect. The addresses must
+     * be formatted like tcp://127.0.0.1:9090 .If you have multiple fronts to
+     * connect, replace {@code 'front-id'} with different values so it won't
+     * override one another in mapping.
+     * </ul>
+     * <p>
+     * To supply proeprties to the method, you should code like this:
+     * <pre>{@code
+     *      var properties = new Properties();
+     *      // Set authentication information.
+     *      properties.put("AppId",
+     *                     "my app id");
+     *      properties.put("AuthCode",
+     *                     "my auth code");
+     *      // Set account login information.
+     *      properties.put("BrokerId",
+     *                     "my broker id");
+     *      properties.put("UserId",
+     *                     "my user id");
+     *      properties.put("Password",
+     *                     "my password");
+     *      // Set flow cache path.
+     *      properties.put("FlowPath",
+     *                     "my flow path");
+     *      // Set connected front addresses.
+     *      properties.put("Front.1",
+     *                     "tcp://127.0.0.1:9090");
+     *      properties.put("Front.2",
+     *                     "tcp://127.0.0.1:9090");
+     *      api.start(properties,
+     *                myGatewayHandler);
+     * }</pre>
+     *
+     * @param properties properties for the gateway to run with.
+     * @throws GatewayException
+     */
+    @Override
+    public void setProperties(Properties properties) throws GatewayException {
+        spi.setProperties(properties);
+    }
+
     @Override
     public void insert(Request request,
                        long requestId) throws GatewayException {
@@ -107,61 +169,13 @@ public class CtpTraderGateway implements ITraderGateway,
      * {@link ITraderGateway#getStatus()} or override
      * {@link ITraderGatewayHandler#onStatusChange}.
      * <p>
-     * The following values must be set in properties:
-     * <ul>
-     * <li><b>AppId</b>: application ID for your client.
-     * <li><b>AuthCode</b>: authcentication code for your client.
-     * <li><b>BrokerId</b>: broker ID for your account.
-     * <li><b>UserId</b>: user ID for your account.
-     * <li><b>Password</b>: password for your account.
-     * <li><b>FlowPath</b>: flow path on your disk to keep sessional
-     * information.
-     * <li><b>Front.front-id</b>: front address to connect. The addresses must
-     * be formatted like tcp://127.0.0.1:9090 .If you have multiple fronts to
-     * connect, replace {@code 'front-id'} with different values so it won't
-     * override one another in mapping.
-     * </ul>
-     * <p>
-     * To supply proeprties to the method, you should code like this:
-     * <pre>{@code
-     *      var properties = new Properties();
-     *      // Set authentication information.
-     *      properties.put("AppId",
-     *                     "my app id");
-     *      properties.put("AuthCode",
-     *                     "my auth code");
-     *      // Set account login information.
-     *      properties.put("BrokerId",
-     *                     "my broker id");
-     *      properties.put("UserId",
-     *                     "my user id");
-     *      properties.put("Password",
-     *                     "my password");
-     *      // Set flow cache path.
-     *      properties.put("FlowPath",
-     *                     "my flow path");
-     *      // Set connected front addresses.
-     *      properties.put("Front.1",
-     *                     "tcp://127.0.0.1:9090");
-     *      properties.put("Front.2",
-     *                     "tcp://127.0.0.1:9090");
-     *      api.start(properties,
-     *                myGatewayHandler);
-     * }</pre>
      *
-     * @param properties properties for the gateway to run with.
-     * @param handler    gateway handler for remote responses.
      * @throws GatewayException thrown when it fails to initialize the client.
      */
-    @Override
-    public void start(Properties properties,
-                      ITraderGatewayHandler handler) throws GatewayException {
-        spi.setProperties(properties);
-        spi.setHandler(handler);
+    public void start() throws GatewayException {
         init();
     }
 
-    @Override
     public void stop() throws GatewayException {
         int r = spi.apiLogout();
         if (r != 0) {

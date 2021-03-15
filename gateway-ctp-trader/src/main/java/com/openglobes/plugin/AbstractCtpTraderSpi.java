@@ -33,8 +33,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,7 +53,6 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     private final       CtpTraderGateway      gate;
     private final       TraderGatewayInfo     info;
     private final       Map<Long, String>     orderIdSysId;
-    private final       ExecutorService       pool;
     private final       Properties            props;
     private final       Map<String, Long>     refOrderId;
     private final       AtomicInteger         requestId;
@@ -68,7 +65,6 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     public AbstractCtpTraderSpi(CtpTraderGateway gateway) {
         info          = new TraderGatewayInfo();
         gate          = gateway;
-        pool          = Executors.newCachedThreadPool();
         props         = new Properties();
         status        = new AtomicInteger(GatewayStatus.NEVER_CONNECTED);
         refOrderId    = new ConcurrentHashMap<>(1024);
@@ -183,113 +179,101 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     void doError(CThostFtdcRspInfoField info) {
-        pool.submit(() -> {
-            try {
-                gate.getHandler().onException(new GatewayRuntimeException(info.getErrorID(),
-                                                                          info.getErrorMsg()));
-            } catch (Throwable ignored) {
-            }
-        });
+        try {
+            gate.getHandler().onException(new GatewayRuntimeException(info.getErrorID(),
+                                                                      info.getErrorMsg()));
+        } catch (Throwable ignored) {
+        }
     }
 
     void doError(CThostFtdcOrderActionField rsp,
                  CThostFtdcRspInfoField info) {
-        pool.submit(() -> {
-            try {
-                gate.getHandler().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
-                                              new GatewayRuntimeException(info.getErrorID(),
-                                                                          info.getErrorMsg()),
-                                              rsp.getRequestID());
-            } catch (Throwable th) {
-                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                          th.getMessage()));
-            }
-        });
+        try {
+            gate.getHandler().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
+                                          new GatewayRuntimeException(info.getErrorID(),
+                                                                      info.getErrorMsg()),
+                                          rsp.getRequestID());
+        } catch (Throwable th) {
+            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                      th.getMessage()));
+        }
     }
 
     void doError(CThostFtdcInputOrderField rsp,
                  CThostFtdcRspInfoField info) {
-        pool.submit(() -> {
-            try {
-                gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                              new GatewayRuntimeException(info.getErrorID(),
-                                                                          info.getErrorMsg()),
-                                              rsp.getRequestID());
-            } catch (Throwable th) {
-                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                          th.getMessage()));
-            }
-        });
+        try {
+            gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
+                                          new GatewayRuntimeException(info.getErrorID(),
+                                                                      info.getErrorMsg()),
+                                          rsp.getRequestID());
+        } catch (Throwable th) {
+            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                      th.getMessage()));
+        }
     }
 
     void doError(CThostFtdcInputOrderActionField rsp,
                  CThostFtdcRspInfoField info,
                  int requestId) {
-        pool.submit(() -> {
-            try {
-                gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                              new GatewayRuntimeException(info.getErrorID(),
-                                                                          info.getErrorMsg()),
-                                              requestId);
-            } catch (Throwable th) {
-                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                          th.getMessage()));
-            }
-        });
+        try {
+            gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
+                                          new GatewayRuntimeException(info.getErrorID(),
+                                                                      info.getErrorMsg()),
+                                          requestId);
+        } catch (Throwable th) {
+            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                      th.getMessage()));
+        }
     }
 
     void doOrder(CThostFtdcOrderField order) {
-        pool.submit(() -> {
-            try {
-                var q = getRequestByOrderId(getOrderIdByOrderRef(order.getOrderRef()));
-                var r = new Response();
-                r.setAction(q.getAction());
-                r.setDirection(q.getDirection());
-                r.setInstrumentId(q.getInstrumentId());
-                r.setOffset(q.getOffset());
-                r.setOrderId(q.getOrderId());
-                r.setResponseId(Utils.nextId());
-                r.setSignature(Utils.nextUuid().toString());
-                r.setStatus(ConstantMaps.getLocalOrderStatus(order.getOrderStatus()));
-                r.setStatusCode(0);
-                r.setStatusMessage(order.getStatusMsg());
-                r.setTimestamp(getTimestamp(order.getUpdateTime()));
-                r.setTraderId(q.getTraderId());
-                r.setTradingDay(LocalDate.parse(order.getTradingDay(),
-                                                dayFormatter));
-                gate.getHandler().onResponse(r);
-            } catch (Throwable th) {
-                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                          th.getMessage()));
-            }
-        });
+        try {
+            var q = getRequestByOrderId(getOrderIdByOrderRef(order.getOrderRef()));
+            var r = new Response();
+            r.setAction(q.getAction());
+            r.setDirection(q.getDirection());
+            r.setInstrumentId(q.getInstrumentId());
+            r.setOffset(q.getOffset());
+            r.setOrderId(q.getOrderId());
+            r.setResponseId(Utils.nextId());
+            r.setSignature(Utils.nextUuid().toString());
+            r.setStatus(ConstantMaps.getLocalOrderStatus(order.getOrderStatus()));
+            r.setStatusCode(0);
+            r.setStatusMessage(order.getStatusMsg());
+            r.setTimestamp(getTimestamp(order.getUpdateTime()));
+            r.setTraderId(q.getTraderId());
+            r.setTradingDay(LocalDate.parse(order.getTradingDay(),
+                                            dayFormatter));
+            gate.getHandler().onResponse(r);
+        } catch (Throwable th) {
+            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                      th.getMessage()));
+        }
     }
 
     void doTrade(CThostFtdcTradeField trade) {
-        pool.submit(() -> {
-            try {
-                var q = getRequestByOrderId(getOrderIdByOrderRef(trade.getOrderRef()));
-                var t = new Trade();
-                t.setAction(q.getAction());
-                t.setDirection(q.getDirection());
-                t.setInstrumentId(q.getInstrumentId());
-                t.setOffset(q.getOffset());
-                t.setOrderId(q.getOrderId());
-                t.setPrice(trade.getPrice());
-                t.setQuantity((long) trade.getVolume());
-                t.setSignature(Utils.nextUuid().toString());
-                t.setTimestamp(getTimestamp(trade.getTradeDate(),
-                                            trade.getTradeTime()));
-                t.setTradeId(Utils.nextId());
-                t.setTraderId(q.getTraderId());
-                t.setTradingDay(LocalDate.parse(trade.getTradingDay(),
-                                                dayFormatter));
-                gate.getHandler().onTrade(t);
-            } catch (Throwable th) {
-                gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                          th.getMessage()));
-            }
-        });
+        try {
+            var q = getRequestByOrderId(getOrderIdByOrderRef(trade.getOrderRef()));
+            var t = new Trade();
+            t.setAction(q.getAction());
+            t.setDirection(q.getDirection());
+            t.setInstrumentId(q.getInstrumentId());
+            t.setOffset(q.getOffset());
+            t.setOrderId(q.getOrderId());
+            t.setPrice(trade.getPrice());
+            t.setQuantity((long) trade.getVolume());
+            t.setSignature(Utils.nextUuid().toString());
+            t.setTimestamp(getTimestamp(trade.getTradeDate(),
+                                        trade.getTradeTime()));
+            t.setTradeId(Utils.nextId());
+            t.setTraderId(q.getTraderId());
+            t.setTradingDay(LocalDate.parse(trade.getTradingDay(),
+                                            dayFormatter));
+            gate.getHandler().onTrade(t);
+        } catch (Throwable th) {
+            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
+                                                                      th.getMessage()));
+        }
     }
 
     String getAppId() {
@@ -389,6 +373,9 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     ZonedDateTime getTimestamp(String time) {
+        if (time.isBlank()) {
+            return ZonedDateTime.now();
+        }
         LocalTime lt = LocalTime.parse(time,
                                        timeFormatter);
         return ZonedDateTime.of(LocalDate.now(),
@@ -470,12 +457,10 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     void setStatus(int status,
                    String msg) {
         this.status.set(status);
-        pool.submit(() -> {
-            try {
-                gate.getHandler().onStatusChange(new ServiceRuntimeStatus(status, msg));
-            } catch (Throwable ignored) {
-            }
-        });
+        try {
+            gate.getHandler().onStatusChange(new ServiceRuntimeStatus(status, msg));
+        } catch (Throwable ignored) {
+        }
     }
 
 }
