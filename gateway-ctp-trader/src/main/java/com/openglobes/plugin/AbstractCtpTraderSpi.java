@@ -247,8 +247,9 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
             r.setStatusMessage(order.getStatusMsg());
             r.setTimestamp(getTimestamp(order.getUpdateTime()));
             r.setTraderId(q.getTraderId());
-            r.setTradingDay(LocalDate.parse(order.getTradingDay(),
-                                            dayFormatter));
+            r.setTradingDay(LocalDate.parse(order.getTradingDay(), dayFormatter));
+            /* Save order system ID */
+            setOrderSysId(order.getOrderSysID(), order.getOrderRef());
             gate.getHandler().onResponse(r);
         } catch (Throwable th) {
             gate.getHandler().onError(

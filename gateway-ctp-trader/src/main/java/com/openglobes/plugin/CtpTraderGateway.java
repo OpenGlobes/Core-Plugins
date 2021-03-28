@@ -27,8 +27,7 @@ import java.util.Properties;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class CtpTraderGateway implements ITraderGateway,
-                                         Runnable {
+public class CtpTraderGateway implements ITraderGateway, Runnable {
 
     private final Thread connThd;
     private final CtpTraderSpi spi;
@@ -56,21 +55,23 @@ public class CtpTraderGateway implements ITraderGateway,
             case ActionType.NEW:
                 i = spi.insertOrder(request);
                 if (i != 0) {
-                    spi.setStatus(i,
-                                  "Sending request failed.");
-                    throw new GatewayRuntimeException(i, "Sending request failed.");
+                    spi.setStatus(i, "Sending request failed.");
+                    spi.getHandler()
+                       .onError(new GatewayRuntimeException(i, "Sending request failed."));
                 }
                 break;
             case ActionType.DELETE:
                 i = spi.deleteOrder(request);
                 if (i != 0) {
                     spi.setStatus(i, "Sending request failed.");
-                    throw new GatewayRuntimeException(i, "Sending request failed.");
+                    spi.getHandler()
+                       .onError(new GatewayRuntimeException(i, "Sending request failed."));
                 }
                 break;
             default:
-                throw new GatewayRuntimeException(-1, "Unknown request action type("
-                                                      + request.getAction() + ").");
+                spi.getHandler()
+                   .onError(new GatewayRuntimeException(
+                           -1, "Unknown request action type(" + request.getAction() + ")."));
         }
     }
 
@@ -141,7 +142,7 @@ public class CtpTraderGateway implements ITraderGateway,
      *
      * @param properties properties for the gateway to run with.
      */
-    public void start(Properties properties)  {
+    public void start(Properties properties) {
         spi.setProperties(properties);
         init();
     }
@@ -172,7 +173,7 @@ public class CtpTraderGateway implements ITraderGateway,
             try {
                 connThd.join(1000);
             } catch (InterruptedException ex) {
-                throw new GatewayRuntimeException(null, ex.getMessage(), ex);
+                spi.getHandler().onError(new GatewayRuntimeException(null, ex.getMessage(), ex));
             }
         }
     }
