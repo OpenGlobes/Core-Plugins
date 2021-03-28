@@ -51,27 +51,33 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
     @Override
     public void insert(Request request) {
         int i;
-        switch (request.getAction()) {
-            case ActionType.NEW:
-                i = spi.insertOrder(request);
-                if (i != 0) {
-                    spi.setStatus(i, "Sending request failed.");
+        try {
+            switch (request.getAction()) {
+                case ActionType.NEW:
+                    i = spi.insertOrder(request);
+                    if (i != 0) {
+                        spi.setStatus(i, "Sending request failed.");
+                        spi.getHandler()
+                           .onError(new GatewayRuntimeException(i, "Sending request failed."));
+                    }
+                    break;
+                case ActionType.DELETE:
+                    i = spi.deleteOrder(request);
+                    if (i != 0) {
+                        spi.setStatus(i, "Sending request failed.");
+                        spi.getHandler()
+                           .onError(new GatewayRuntimeException(i, "Sending request failed."));
+                    }
+                    break;
+                default:
                     spi.getHandler()
-                       .onError(new GatewayRuntimeException(i, "Sending request failed."));
-                }
-                break;
-            case ActionType.DELETE:
-                i = spi.deleteOrder(request);
-                if (i != 0) {
-                    spi.setStatus(i, "Sending request failed.");
-                    spi.getHandler()
-                       .onError(new GatewayRuntimeException(i, "Sending request failed."));
-                }
-                break;
-            default:
-                spi.getHandler()
-                   .onError(new GatewayRuntimeException(
-                           -1, "Unknown request action type(" + request.getAction() + ")."));
+                       .onError(new GatewayRuntimeException(
+                               -1, "Unknown request action type(" + request.getAction() + ")."));
+            }
+        } catch (GatewayRuntimeException ex) {
+            spi.getHandler().onError(ex);
+        } catch (Throwable th) {
+            spi.getHandler().onError(new GatewayRuntimeException(-1, th.getMessage(), th));
         }
     }
 
@@ -117,27 +123,18 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
      * <pre>{@code
      *      var properties = new Properties();
      *      // Set authentication information.
-     *      properties.put("AppId",
-     *                     "my app id");
-     *      properties.put("AuthCode",
-     *                     "my auth code");
+     *      properties.put("AppId", "my app id");
+     *      properties.put("AuthCode", "my auth code");
      *      // Set account login information.
-     *      properties.put("BrokerId",
-     *                     "my broker id");
-     *      properties.put("UserId",
-     *                     "my user id");
-     *      properties.put("Password",
-     *                     "my password");
+     *      properties.put("BrokerId", "my broker id");
+     *      properties.put("UserId", "my user id");
+     *      properties.put("Password", "my password");
      *      // Set flow cache path.
-     *      properties.put("FlowPath",
-     *                     "my flow path");
+     *      properties.put("FlowPath", "my flow path");
      *      // Set connected front addresses.
-     *      properties.put("Front.1",
-     *                     "tcp://127.0.0.1:9090");
-     *      properties.put("Front.2",
-     *                     "tcp://127.0.0.1:9090");
-     *      api.start(properties,
-     *                myGatewayHandler);
+     *      properties.put("Front.1", "tcp://127.0.0.1:9090");
+     *      properties.put("Front.2", "tcp://127.0.0.1:9090");
+     *      api.start(properties,myGatewayHandler);
      * }</pre>
      *
      * @param properties properties for the gateway to run with.

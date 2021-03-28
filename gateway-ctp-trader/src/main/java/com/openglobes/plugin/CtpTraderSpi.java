@@ -31,28 +31,24 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
     @Override
     public void OnErrRtnOrderAction(CThostFtdcOrderActionField rsp,
                                     CThostFtdcRspInfoField info) {
-        doError(rsp,
-                info);
+        doError(rsp, info);
     }
 
     @Override
     public void OnErrRtnOrderInsert(CThostFtdcInputOrderField rsp,
                                     CThostFtdcRspInfoField info) {
-        doError(rsp,
-                info);
+        doError(rsp, info);
     }
 
     @Override
     public void OnFrontConnected() {
-        setStatus(GatewayStatus.CONNECTED,
-                  "Connected.");
+        setStatus(GatewayStatus.CONNECTED, "Connected.");
         apiAuthenticate();
     }
 
     @Override
     public void OnFrontDisconnected(int nReason) {
-        setStatus(GatewayStatus.DISCONNECTED,
-                  "Disconnected(" + nReason + ").");
+        setStatus(GatewayStatus.DISCONNECTED, "Disconnected(" + nReason + ").");
     }
 
     @Override
@@ -64,12 +60,10 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             return;
         }
         if (info.getErrorID() != 0) {
-            setStatus(GatewayStatus.AUTHENTICATE_FAIL,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.AUTHENTICATE_FAIL, info.getErrorMsg());
             doError(info);
         } else {
-            setStatus(GatewayStatus.AUTHENTICATED,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.AUTHENTICATED, info.getErrorMsg());
             apiLogin();
         }
     }
@@ -78,6 +72,8 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
     public void OnRspError(CThostFtdcRspInfoField info,
                            int requestId,
                            boolean isLast) {
+        setStatus(GatewayStatus.UNKNOWN_ERROR, info.getErrorMsg());
+        doError(info);
     }
 
     @Override
@@ -85,9 +81,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
                                  CThostFtdcRspInfoField info,
                                  int requestId,
                                  boolean isLast) {
-        doError(rsp,
-                info,
-                requestId);
+        doError(rsp, info, requestId);
     }
 
     @Override
@@ -95,8 +89,7 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
                                  CThostFtdcRspInfoField info,
                                  int requestId,
                                  boolean isLast) {
-        doError(rsp,
-                info);
+        doError(rsp, info);
     }
 
     @Override
@@ -108,12 +101,10 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             return;
         }
         if (info.getErrorID() != 0) {
-            setStatus(GatewayStatus.CONFIRM_FAIL,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.CONFIRM_FAIL, info.getErrorMsg());
             doError(info);
         } else {
-            setStatus(GatewayStatus.CONFIRMED,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.CONFIRMED, info.getErrorMsg());
         }
     }
 
@@ -126,12 +117,10 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             return;
         }
         if (info.getErrorID() != 0) {
-            setStatus(GatewayStatus.LOGIN_FAIL,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.LOGIN_FAIL, info.getErrorMsg());
             doError(info);
         } else {
-            setStatus(GatewayStatus.LOGIN,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.LOGIN, info.getErrorMsg());
             setInfo(rsp);
             apiConfirmSettlement();
         }
@@ -146,12 +135,10 @@ class CtpTraderSpi extends AbstractCtpTraderSpi {
             return;
         }
         if (info.getErrorID() != 0) {
-            setStatus(GatewayStatus.LOGOUT_FAIL,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.LOGOUT_FAIL, info.getErrorMsg());
             doError(info);
         } else {
-            setStatus(GatewayStatus.LOGOUT,
-                      info.getErrorMsg());
+            setStatus(GatewayStatus.LOGOUT, info.getErrorMsg());
         }
     }
 
