@@ -27,7 +27,10 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,19 +52,53 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     private final CtpTraderGateway gate;
     private final TraderGatewayInfo info;
     private final Map<Long, String> orderIdSysId;
-    private final Properties props;
     private final Map<String, Long> refOrderId;
     private final AtomicInteger requestId;
     private final Map<Long, Request> requests;
     private final AtomicInteger status;
     private final Map<String, Long> sysIdOrderId;
     private final DateTimeFormatter timeFormatter;
+    private final Collection<String> addrs;
     private ITraderGatewayHandler hnd;
+    private String userId;
+    private String brokerId;
+    private String pwd;
+    private String appId;
+    private String authCode;
+    private String flowPath;
+
+    void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    void setBrokerId(String brokerId) {
+        this.brokerId = brokerId;
+    }
+
+    void setPassword(String password) {
+        this.pwd = pwd;
+    }
+
+    void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    void setAuthCode(String authCode) {
+        this.authCode = authCode;
+    }
+
+    void setFlowPath(String flowPath) {
+        this.flowPath = flowPath;
+    }
+
+    void addFront(String addr) {
+        addrs.add(addr);
+    }
 
     public AbstractCtpTraderSpi(CtpTraderGateway gateway) {
         info = new TraderGatewayInfo();
         gate = gateway;
-        props = new Properties();
+        addrs = new LinkedList<>();
         status = new AtomicInteger(GatewayStatus.NEVER_CONNECTED);
         refOrderId = new ConcurrentHashMap<>(1024);
         orderIdSysId = new ConcurrentHashMap<>(1024);
@@ -281,30 +318,23 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     String getAppId() {
-        return props.getProperty("AppId", "");
+        return appId;
     }
 
     String getAuthCode() {
-        return props.getProperty("AuthCode", "");
+        return authCode;
     }
 
     String getBrokerId() {
-        return props.getProperty("BrokerId", "");
+        return brokerId;
     }
 
     String getFlowPath() {
-        return props.getProperty("FlowPath", "");
+        return flowPath;
     }
 
     Collection<String> getFronts() {
-        var r = new HashSet<String>(16);
-        props.entrySet().forEach(entry -> {
-            String key = (String) entry.getKey();
-            if (key.startsWith("Front.")) {
-                r.add((String) entry.getValue());
-            }
-        });
-        return r;
+        return new LinkedList<>(addrs);
     }
 
     ITraderGatewayHandler getHandler() {
@@ -359,17 +389,9 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     String getPassword() {
-        return props.getProperty("Password", "");
+        return pwd;
     }
 
-    Properties getProperties() {
-        return props;
-    }
-
-    void setProperties(Properties properties) {
-        props.clear();
-        props.putAll(properties);
-    }
 
     int getStatus() {
         return status.get();
@@ -390,7 +412,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     String getUserId() {
-        return props.getProperty("UserId", "");
+        return userId;
     }
 
     int insertOrder(Request request) {

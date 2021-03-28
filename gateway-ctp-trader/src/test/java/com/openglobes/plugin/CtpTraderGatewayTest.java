@@ -55,26 +55,17 @@ class CtpTraderGatewayTest {
     @DisplayName("ITraderGateway::start()")
     public void start() {
         var gate  = new CtpTraderGateway();
-        var props = new Properties();
-
         // Set authentication information.
-        props.put("AppId",
-                  "3430491819");
-        props.put("AuthCode",
-                  "0000000000000000");
+        gate.setAppId("3430491819");
+        gate.setAuthCode("0000000000000000");
         // Set account login information.
-        props.put("BrokerId",
-                  "9999");
-        props.put("UserId",
-                  "144287");
-        props.put("Password",
-                  "chb_1987_1013");
+        gate.setBrokerId("9999");
+        gate.setUserId("144287");
+        gate.setPassword("chb_1987_1013");
         // Set flow cache path.
-        props.put("FlowPath",
-                  "C:\\Users\\chenh\\Desktop\\gateway\\");
+        gate.setFlowPath("C:\\Users\\chenh\\Desktop\\gateway\\");
         // Set connected front addresses.
-        props.put("Front.1",
-                  "tcp://180.168.146.187:10101");
+        gate.addFront("tcp://180.168.146.187:10101");
         final var latch = new CountDownLatch(1);
         try {
             gate.setHandler(new ITraderGatewayHandler() {
@@ -151,7 +142,7 @@ class CtpTraderGatewayTest {
                     }
                 }
             });
-            gate.start(props);
+            gate.start();
             latch.await();
         } catch (GatewayRuntimeException | InterruptedException e) {
             e.printStackTrace();

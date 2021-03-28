@@ -94,53 +94,7 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
         }
     }
 
-    /**
-     * Start this gateway with the specifed properties and handler.
-     * <p>
-     * This method only initiates a connection to the remote server and it
-     * doesn't guarantee the successful response from the remote. To make sure
-     * its connection succeeds, to inspect it current status, call
-     * {@link ITraderGateway#getStatus()} or override
-     * {@link ITraderGatewayHandler#onStatusChange}.
-     * <p>
-     * <p>
-     * The following values must be set in properties:
-     * <ul>
-     * <li><b>AppId</b>: application ID for your client.
-     * <li><b>AuthCode</b>: authcentication code for your client.
-     * <li><b>BrokerId</b>: broker ID for your account.
-     * <li><b>UserId</b>: user ID for your account.
-     * <li><b>Password</b>: password for your account.
-     * <li><b>FlowPath</b>: flow path on your disk to keep sessional
-     * information.
-     * <li><b>Front.front-id</b>: front address to connect. The addresses must
-     * be formatted like tcp://127.0.0.1:9090 .If you have multiple fronts to
-     * connect, replace {@code 'front-id'} with different values so it won't
-     * override one another in mapping.
-     * </ul>
-     * <p>
-     * To supply proeprties to the method, you should code like this:
-     * <pre>{@code
-     *      var properties = new Properties();
-     *      // Set authentication information.
-     *      properties.put("AppId", "my app id");
-     *      properties.put("AuthCode", "my auth code");
-     *      // Set account login information.
-     *      properties.put("BrokerId", "my broker id");
-     *      properties.put("UserId", "my user id");
-     *      properties.put("Password", "my password");
-     *      // Set flow cache path.
-     *      properties.put("FlowPath", "my flow path");
-     *      // Set connected front addresses.
-     *      properties.put("Front.1", "tcp://127.0.0.1:9090");
-     *      properties.put("Front.2", "tcp://127.0.0.1:9090");
-     *      api.start(properties,myGatewayHandler);
-     * }</pre>
-     *
-     * @param properties properties for the gateway to run with.
-     */
-    public void start(Properties properties) {
-        spi.setProperties(properties);
+    public void start() {
         init();
     }
 
@@ -151,6 +105,34 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
         }
         api.Release();
         terminateThread();
+    }
+
+    public void setUserId(String userId) {
+        spi.setUserId(userId);
+    }
+
+    public void setBrokerId(String brokerId) {
+        spi.setBrokerId(brokerId);
+    }
+
+    public void setPassword(String password) {
+        spi.setPassword(password);
+    }
+
+    public void setAppId(String appId) {
+        spi.setAppId(appId);
+    }
+
+    public void setAuthCode(String authCode) {
+        spi.setAuthCode(authCode);
+    }
+
+    public void setFlowPath(String flowPath) {
+        spi.setFlowPath(flowPath);
+    }
+
+    public void addFront(String addr) {
+        spi.addFront(addr);
     }
 
     private void init() {
