@@ -17,7 +17,6 @@
 
 package com.openglobes.plugin;
 
-import com.openglobes.core.GatewayException;
 import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.ServiceRuntimeStatus;
 import com.openglobes.core.trader.*;
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Order;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.time.ZonedDateTime;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -53,7 +51,7 @@ class CtpTraderGatewayTest {
 
     @Test
     @Order(0)
-    //@Disabled
+    @Disabled
     @DisplayName("ITraderGateway::start()")
     public void start() {
         var gate  = new CtpTraderGateway();
@@ -105,8 +103,8 @@ class CtpTraderGatewayTest {
                     r.setTag("unit_test");
                     r.setUpdateTimestamp(ZonedDateTime.now());
                     try {
-                        gate.insert(r, requestId);
-                    } catch (GatewayException e) {
+                        gate.insert(r);
+                    } catch (GatewayRuntimeException e) {
                         e.printStackTrace();
                     }
                 }
@@ -117,14 +115,14 @@ class CtpTraderGatewayTest {
                 }
 
                 @Override
-                public void onException(GatewayRuntimeException e) {
+                public void onError(GatewayRuntimeException e) {
                     System.out.println(Utils.jsonify(e));
                 }
 
                 @Override
-                public void onException(Request request, GatewayRuntimeException e, int i) {
+                public void onError(Request request, Response response) {
                     System.out.println(Utils.jsonify(request));
-                    System.out.println(Utils.jsonify(e));
+                    System.out.println(Utils.jsonify(response));
                 }
 
                 @Override
@@ -146,8 +144,8 @@ class CtpTraderGatewayTest {
                         r.setTag("unit_test");
                         r.setUpdateTimestamp(ZonedDateTime.now());
                         try {
-                            gate.insert(r, requestId);
-                        } catch (GatewayException e) {
+                            gate.insert(r);
+                        } catch (GatewayRuntimeException e) {
                             e.printStackTrace();
                         }
                     }
@@ -155,7 +153,7 @@ class CtpTraderGatewayTest {
             });
             gate.start(props);
             latch.await();
-        } catch (GatewayException | InterruptedException e) {
+        } catch (GatewayRuntimeException | InterruptedException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

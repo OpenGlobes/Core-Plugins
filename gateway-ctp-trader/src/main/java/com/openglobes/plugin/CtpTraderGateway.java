@@ -16,7 +16,7 @@
  */
 package com.openglobes.plugin;
 
-import com.openglobes.core.GatewayException;
+import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.trader.*;
 import org.ctp4j.CThostFtdcTraderApi;
 import org.ctp4j.THOST_TE_RESUME_TYPE;
@@ -30,12 +30,12 @@ import java.util.Properties;
 public class CtpTraderGateway implements ITraderGateway,
                                          Runnable {
 
-    private final Thread              connThd;
-    private final CtpTraderSpi        spi;
-    private       CThostFtdcTraderApi api;
+    private final Thread connThd;
+    private final CtpTraderSpi spi;
+    private CThostFtdcTraderApi api;
 
     public CtpTraderGateway() {
-        spi     = new CtpTraderSpi(this);
+        spi = new CtpTraderSpi(this);
         connThd = new Thread(this);
     }
 
@@ -49,43 +49,28 @@ public class CtpTraderGateway implements ITraderGateway,
         return spi.getStatus();
     }
 
-    /**
-     * @param handler gateway handler for remote responses.
-     * @throws GatewayException
-     */
     @Override
-    public void setHandler(ITraderGatewayHandler handler) throws GatewayException {
-        spi.setHandler(handler);
-    }
-
-    @Override
-    public void insert(Request request,
-                       long requestId) throws GatewayException {
+    public void insert(Request request) {
         int i;
         switch (request.getAction()) {
             case ActionType.NEW:
-                i = spi.insertOrder(request,
-                                    requestId);
+                i = spi.insertOrder(request);
                 if (i != 0) {
                     spi.setStatus(i,
                                   "Sending request failed.");
-                    throw new GatewayException(i,
-                                               "Sending request failed.");
+                    throw new GatewayRuntimeException(i, "Sending request failed.");
                 }
                 break;
             case ActionType.DELETE:
-                i = spi.deleteOrder(request,
-                                    requestId);
+                i = spi.deleteOrder(request);
                 if (i != 0) {
-                    spi.setStatus(i,
-                                  "Sending request failed.");
-                    throw new GatewayException(i,
-                                               "Sending request failed.");
+                    spi.setStatus(i, "Sending request failed.");
+                    throw new GatewayRuntimeException(i, "Sending request failed.");
                 }
                 break;
             default:
-                throw new GatewayException(-1,
-                                           "Unknown request action type(" + request.getAction() + ").");
+                throw new GatewayRuntimeException(-1, "Unknown request action type("
+                                                      + request.getAction() + ").");
         }
     }
 
@@ -155,18 +140,16 @@ public class CtpTraderGateway implements ITraderGateway,
      * }</pre>
      *
      * @param properties properties for the gateway to run with.
-     * @throws GatewayException thrown when it fails to initialize the client.
      */
-    public void start(Properties properties) throws GatewayException {
+    public void start(Properties properties)  {
         spi.setProperties(properties);
         init();
     }
 
-    public void stop() throws GatewayException {
+    public void stop() {
         int r = spi.apiLogout();
         if (r != 0) {
-            spi.setStatus(r,
-                          "Sending logout request failed.");
+            spi.setStatus(r, "Sending logout request failed.");
         }
         api.Release();
         terminateThread();
@@ -183,15 +166,13 @@ public class CtpTraderGateway implements ITraderGateway,
         connThd.start();
     }
 
-    private void terminateThread() throws GatewayException {
+    private void terminateThread() {
         if (connThd.isAlive()) {
             connThd.interrupt();
             try {
                 connThd.join(1000);
             } catch (InterruptedException ex) {
-                throw new GatewayException(null,
-                                           ex.getMessage(),
-                                           ex);
+                throw new GatewayRuntimeException(null, ex.getMessage(), ex);
             }
         }
     }
@@ -202,5 +183,13 @@ public class CtpTraderGateway implements ITraderGateway,
 
     ITraderGatewayHandler getHandler() {
         return spi.getHandler();
+    }
+
+    /**
+     * @param handler gateway handler for remote responses.
+     */
+    @Override
+    public void setHandler(ITraderGatewayHandler handler) {
+        spi.setHandler(handler);
     }
 }

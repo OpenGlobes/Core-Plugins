@@ -16,7 +16,7 @@
  */
 package com.openglobes.plugin;
 
-import com.openglobes.core.GatewayException;
+import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.trader.Direction;
 import com.openglobes.core.trader.Offset;
 import com.openglobes.core.trader.OrderStatus;
@@ -30,19 +30,19 @@ public class ConstantMaps {
     private ConstantMaps() {
     }
 
-    public static Character getDestinatedDirection(Integer localDirection) throws GatewayException {
+    public static Character getDestinatedDirection(Integer localDirection) {
         switch (localDirection) {
             case Direction.BUY:
                 return '0';
             case Direction.SELL:
                 return '1';
             default:
-                throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                           "Unknown local direction " + localDirection + ".");
+                throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                                  "Unknown local direction " + localDirection + ".");
         }
     }
 
-    public static Character getDestinatedOffset(Integer localOffset) throws GatewayException {
+    public static Character getDestinatedOffset(Integer localOffset) {
         switch (localOffset) {
             case Offset.OPEN:
                 return '0';
@@ -53,8 +53,8 @@ public class ConstantMaps {
             case Offset.CLOSE_YD:
                 return '4';
             default:
-                throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                           "Unknown local offset " + localOffset + ".");
+                throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                                  "Unknown local offset " + localOffset + ".");
         }
     }
 

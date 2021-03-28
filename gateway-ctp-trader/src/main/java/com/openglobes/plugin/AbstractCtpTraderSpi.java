@@ -16,7 +16,6 @@
  */
 package com.openglobes.plugin;
 
-import com.openglobes.core.GatewayException;
 import com.openglobes.core.GatewayRuntimeException;
 import com.openglobes.core.ServiceRuntimeStatus;
 import com.openglobes.core.trader.*;
@@ -28,10 +27,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,39 +37,39 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
 
-    public static final int                   THOST_FTDC_AF_Delete         = '0';
-    public static final char                  THOST_FTDC_CC_Immediately    = '1';
-    public static final char                  THOST_FTDC_FCC_NotForceClose = '0';
-    public static final char                  THOST_FTDC_HF_Speculation    = '1';
-    public static final char                  THOST_FTDC_OPT_LimitPrice    = '2';
-    public static final char                  THOST_FTDC_TC_GFD            = '3';
-    public static final char                  THOST_FTDC_VC_AV             = '1';
-    private final       AtomicInteger         curOrderRef;
-    private final       DateTimeFormatter     dayFormatter;
-    private final       CtpTraderGateway      gate;
-    private final       TraderGatewayInfo     info;
-    private final       Map<Long, String>     orderIdSysId;
-    private final       Properties            props;
-    private final       Map<String, Long>     refOrderId;
-    private final       AtomicInteger         requestId;
-    private final       Map<Long, Request>    requests;
-    private final       AtomicInteger         status;
-    private final       Map<String, Long>     sysIdOrderId;
-    private final       DateTimeFormatter     timeFormatter;
-    private             ITraderGatewayHandler hnd;
+    public static final int THOST_FTDC_AF_Delete = '0';
+    public static final char THOST_FTDC_CC_Immediately = '1';
+    public static final char THOST_FTDC_FCC_NotForceClose = '0';
+    public static final char THOST_FTDC_HF_Speculation = '1';
+    public static final char THOST_FTDC_OPT_LimitPrice = '2';
+    public static final char THOST_FTDC_TC_GFD = '3';
+    public static final char THOST_FTDC_VC_AV = '1';
+    private final AtomicInteger curOrderRef;
+    private final DateTimeFormatter dayFormatter;
+    private final CtpTraderGateway gate;
+    private final TraderGatewayInfo info;
+    private final Map<Long, String> orderIdSysId;
+    private final Properties props;
+    private final Map<String, Long> refOrderId;
+    private final AtomicInteger requestId;
+    private final Map<Long, Request> requests;
+    private final AtomicInteger status;
+    private final Map<String, Long> sysIdOrderId;
+    private final DateTimeFormatter timeFormatter;
+    private ITraderGatewayHandler hnd;
 
     public AbstractCtpTraderSpi(CtpTraderGateway gateway) {
-        info          = new TraderGatewayInfo();
-        gate          = gateway;
-        props         = new Properties();
-        status        = new AtomicInteger(GatewayStatus.NEVER_CONNECTED);
-        refOrderId    = new ConcurrentHashMap<>(1024);
-        orderIdSysId  = new ConcurrentHashMap<>(1024);
-        sysIdOrderId  = new ConcurrentHashMap<>(1024);
-        curOrderRef   = new AtomicInteger(0);
-        requestId     = new AtomicInteger(0);
-        requests      = new ConcurrentHashMap<>(1024);
-        dayFormatter  = DateTimeFormatter.ofPattern("yyyyMMdd");
+        info = new TraderGatewayInfo();
+        gate = gateway;
+        props = new Properties();
+        status = new AtomicInteger(GatewayStatus.NEVER_CONNECTED);
+        refOrderId = new ConcurrentHashMap<>(1024);
+        orderIdSysId = new ConcurrentHashMap<>(1024);
+        sysIdOrderId = new ConcurrentHashMap<>(1024);
+        curOrderRef = new AtomicInteger(0);
+        requestId = new AtomicInteger(0);
+        requests = new ConcurrentHashMap<>(1024);
+        dayFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     }
 
@@ -84,10 +80,10 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         sysIdOrderId.clear();
     }
 
-    private Request getRequestByOrderId(Long orderId) throws GatewayException {
+    private Request getRequestByOrderId(Long orderId) {
         if (!requests.containsKey(orderId)) {
-            throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                       "No request for order ID " + orderId + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                              "No request for order ID " + orderId + ".");
         }
         return requests.get(orderId);
     }
@@ -96,10 +92,10 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         return requestId.incrementAndGet();
     }
 
-    private void saveRequest(Request request) throws GatewayException {
+    private void saveRequest(Request request) {
         if (requests.containsKey(request.getOrderId())) {
-            throw new GatewayException(GatewayStatus.INTERNAL_COLLISION,
-                                       "Duplicated order ID " + request.getOrderId() + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_COLLISION,
+                                              "Duplicated order ID " + request.getOrderId() + ".");
         }
         requests.put(request.getOrderId(),
                      request);
@@ -112,8 +108,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         r.setBrokerID(getBrokerId());
         r.setUserID(getUserId());
         r.setUserProductInfo("COREBOT");
-        return gate.getApi().ReqAuthenticate(r,
-                                             nextRequestId());
+        return gate.getApi().ReqAuthenticate(r, nextRequestId());
     }
 
     int apiConfirmSettlement() {
@@ -125,8 +120,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         r.setCurrencyID("CNY");
         r.setInvestorID(getUserId());
         r.setSettlementID(0);
-        return gate.getApi().ReqSettlementInfoConfirm(r,
-                                                      nextRequestId());
+        return gate.getApi().ReqSettlementInfoConfirm(r, nextRequestId());
     }
 
     int apiLogin() {
@@ -143,20 +137,17 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         r.setTradingDay("");
         r.setUserID(getUserId());
         r.setUserProductInfo("");
-        return gate.getApi().ReqUserLogin(r,
-                                          nextRequestId());
+        return gate.getApi().ReqUserLogin(r, nextRequestId());
     }
 
     int apiLogout() {
         var r = new CThostFtdcUserLogoutField();
         r.setBrokerID(getBrokerId());
         r.setUserID(getUserId());
-        return gate.getApi().ReqUserLogout(r,
-                                           nextRequestId());
+        return gate.getApi().ReqUserLogout(r, nextRequestId());
     }
 
-    int deleteOrder(Request request,
-                    long requestId) throws GatewayException {
+    int deleteOrder(Request request) {
         CThostFtdcInputOrderActionField r = new CThostFtdcInputOrderActionField();
         r.setActionFlag((char) THOST_FTDC_AF_Delete);
         r.setBrokerID(getBrokerId());
@@ -171,17 +162,17 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         r.setOrderActionRef(0);
         r.setOrderRef("");
         r.setOrderSysID(getOrderSysIdByOrderId(request.getOrderId()));
-        r.setRequestID((int) requestId);
+        r.setRequestID(request.getRequestId().intValue());
         r.setSessionID(0);
         r.setUserID(getUserId());
         r.setVolumeChange(0);
-        return gate.getApi().ReqOrderAction(r, (int) requestId);
+        return gate.getApi().ReqOrderAction(r, request.getRequestId().intValue());
     }
 
     void doError(CThostFtdcRspInfoField info) {
         try {
-            gate.getHandler().onException(new GatewayRuntimeException(info.getErrorID(),
-                                                                      info.getErrorMsg()));
+            gate.getHandler()
+                .onError(new GatewayRuntimeException(info.getErrorID(), info.getErrorMsg()));
         } catch (Throwable ignored) {
         }
     }
@@ -189,26 +180,41 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     void doError(CThostFtdcOrderActionField rsp,
                  CThostFtdcRspInfoField info) {
         try {
-            gate.getHandler().onException(getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID())),
-                                          new GatewayRuntimeException(info.getErrorID(),
-                                                                      info.getErrorMsg()),
-                                          rsp.getRequestID());
+            var request = getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID()));
+            var response = createErrorResponse(request, info);
+            gate.getHandler().onError(request, response);
         } catch (Throwable th) {
-            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                      th.getMessage()));
+            gate.getHandler().onError(
+                    new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
         }
+    }
+
+    private Response createErrorResponse(Request request, CThostFtdcRspInfoField info) {
+        var r = new Response();
+        r.setTraderId(request.getTraderId());
+        r.setStatus(OrderStatus.REJECTED);
+        r.setSignature(UUID.randomUUID().toString());
+        r.setTimestamp(ZonedDateTime.now());
+        r.setOffset(request.getOffset());
+        r.setStatusCode(info.getErrorID());
+        r.setStatusMessage(info.getErrorMsg());
+        r.setTradingDay(request.getTradingDay());
+        r.setOrderId(request.getOrderId());
+        r.setInstrumentId(request.getInstrumentId());
+        r.setDirection(request.getDirection());
+        r.setResponseId(Utils.nextId());
+        return r;
     }
 
     void doError(CThostFtdcInputOrderField rsp,
                  CThostFtdcRspInfoField info) {
         try {
-            gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                          new GatewayRuntimeException(info.getErrorID(),
-                                                                      info.getErrorMsg()),
-                                          rsp.getRequestID());
+            var request = getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef()));
+            var response = createErrorResponse(request, info);
+            gate.getHandler().onError(request, response);
         } catch (Throwable th) {
-            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                      th.getMessage()));
+            gate.getHandler().onError(
+                    new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
         }
     }
 
@@ -216,13 +222,12 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                  CThostFtdcRspInfoField info,
                  int requestId) {
         try {
-            gate.getHandler().onException(getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef())),
-                                          new GatewayRuntimeException(info.getErrorID(),
-                                                                      info.getErrorMsg()),
-                                          requestId);
+            var request = getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef()));
+            var response = createErrorResponse(request, info);
+            gate.getHandler().onError(request, response);
         } catch (Throwable th) {
-            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                      th.getMessage()));
+            gate.getHandler().onError(
+                    new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
         }
     }
 
@@ -246,8 +251,8 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
                                             dayFormatter));
             gate.getHandler().onResponse(r);
         } catch (Throwable th) {
-            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                      th.getMessage()));
+            gate.getHandler().onError(
+                    new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
         }
     }
 
@@ -263,16 +268,14 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
             t.setPrice(trade.getPrice());
             t.setQuantity((long) trade.getVolume());
             t.setSignature(Utils.nextUuid().toString());
-            t.setTimestamp(getTimestamp(trade.getTradeDate(),
-                                        trade.getTradeTime()));
+            t.setTimestamp(getTimestamp(trade.getTradeDate(), trade.getTradeTime()));
             t.setTradeId(Utils.nextId());
             t.setTraderId(q.getTraderId());
-            t.setTradingDay(LocalDate.parse(trade.getTradingDay(),
-                                            dayFormatter));
+            t.setTradingDay(LocalDate.parse(trade.getTradingDay(), dayFormatter));
             gate.getHandler().onTrade(t);
         } catch (Throwable th) {
-            gate.getHandler().onException(new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT,
-                                                                      th.getMessage()));
+            gate.getHandler().onError(
+                    new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
         }
     }
 
@@ -316,8 +319,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     void setInfo(CThostFtdcRspUserLoginField rsp) {
-        var tradingDay = LocalDate.parse(rsp.getTradingDay(),
-                                         dayFormatter);
+        var tradingDay = LocalDate.parse(rsp.getTradingDay(), dayFormatter);
         if (info.getTradingDay() != null
             && !info.getTradingDay().equals(tradingDay)) {
             /*
@@ -331,26 +333,26 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         curOrderRef.set(Integer.parseInt(rsp.getMaxOrderRef()));
     }
 
-    Long getOrderIdByOrderRef(String orderRef) throws GatewayException {
+    Long getOrderIdByOrderRef(String orderRef) {
         if (!refOrderId.containsKey(orderRef)) {
-            throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                       "Order ID not found for order reference " + orderRef + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                              "Order ID not found for order reference " + orderRef + ".");
         }
         return refOrderId.get(orderRef);
     }
 
-    Long getOrderIdBySysId(String sysId) throws GatewayException {
+    Long getOrderIdBySysId(String sysId) {
         if (!sysIdOrderId.containsKey(sysId)) {
-            throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                       "Order ID not found for system ID " + sysId + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                              "Order ID not found for system ID " + sysId + ".");
         }
         return sysIdOrderId.get(sysId);
     }
 
-    String getOrderSysIdByOrderId(Long orderId) throws GatewayException {
+    String getOrderSysIdByOrderId(Long orderId) {
         if (!orderIdSysId.containsKey(orderId)) {
-            throw new GatewayException(GatewayStatus.INTERNAL_MISSED,
-                                       "Order system ID not found for order ID " + orderId + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_MISSED,
+                                              "Order system ID not found for order ID " + orderId + ".");
         }
         return orderIdSysId.get(orderId);
     }
@@ -376,29 +378,21 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         if (time.isBlank()) {
             return ZonedDateTime.now();
         }
-        LocalTime lt = LocalTime.parse(time,
-                                       timeFormatter);
-        return ZonedDateTime.of(LocalDate.now(),
-                                lt,
-                                ZoneId.systemDefault());
+        LocalTime lt = LocalTime.parse(time, timeFormatter);
+        return ZonedDateTime.of(LocalDate.now(), lt, ZoneId.systemDefault());
     }
 
     ZonedDateTime getTimestamp(String day, String time) {
-        LocalTime lt = LocalTime.parse(time,
-                                       timeFormatter);
-        LocalDate ld = LocalDate.parse(day,
-                                       dayFormatter);
-        return ZonedDateTime.of(ld,
-                                lt,
-                                ZoneId.systemDefault());
+        LocalTime lt = LocalTime.parse(time, timeFormatter);
+        LocalDate ld = LocalDate.parse(day, dayFormatter);
+        return ZonedDateTime.of(ld, lt, ZoneId.systemDefault());
     }
 
     String getUserId() {
         return props.getProperty("UserId", "");
     }
 
-    int insertOrder(Request request,
-                    long requestId) throws GatewayException {
+    int insertOrder(Request request) {
         saveRequest(request);
         /*
          * Translate local request.
@@ -427,35 +421,31 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         r.setMinVolume(1);
         r.setOrderPriceType(THOST_FTDC_OPT_LimitPrice);
         r.setOrderRef(nextOrderRefByOrderId(request.getOrderId()));
-        r.setRequestID((int) requestId);
+        r.setRequestID(request.getRequestId().intValue());
         r.setStopPrice(0);
         r.setTimeCondition(THOST_FTDC_TC_GFD);
         r.setUserForceClose(0);
         r.setUserID(getUserId());
         r.setVolumeCondition(THOST_FTDC_VC_AV);
         r.setVolumeTotalOriginal(request.getQuantity().intValue());
-        return gate.getApi().ReqOrderInsert(r, (int) requestId);
+        return gate.getApi().ReqOrderInsert(r, request.getRequestId().intValue());
     }
 
-    String nextOrderRefByOrderId(Long orderId) throws GatewayException {
+    String nextOrderRefByOrderId(Long orderId) {
         var ref = Integer.toString(curOrderRef.incrementAndGet());
         if (refOrderId.containsKey(ref)) {
-            throw new GatewayException(GatewayStatus.INTERNAL_COLLISION,
-                                       "Duplicated order reference " + ref + ".");
+            throw new GatewayRuntimeException(GatewayStatus.INTERNAL_COLLISION,
+                                              "Duplicated order reference " + ref + ".");
         }
-        refOrderId.put(ref,
-                       orderId);
+        refOrderId.put(ref, orderId);
         return ref;
     }
 
-    void setOrderSysId(String orderSysId,
-                       String orderRef) throws GatewayException {
-        orderIdSysId.put(getOrderIdByOrderRef(orderRef),
-                         orderSysId);
+    void setOrderSysId(String orderSysId, String orderRef) {
+        orderIdSysId.put(getOrderIdByOrderRef(orderRef), orderSysId);
     }
 
-    void setStatus(int status,
-                   String msg) {
+    void setStatus(int status, String msg) {
         this.status.set(status);
         try {
             gate.getHandler().onStatusChange(new ServiceRuntimeStatus(status, msg));
