@@ -219,7 +219,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         try {
             var request = getRequestByOrderId(getOrderIdBySysId(rsp.getOrderSysID()));
             var response = createErrorResponse(request, info);
-            gate.getHandler().onError(request, response);
+            gate.getHandler().onResponse(response);
         } catch (Throwable th) {
             gate.getHandler().onError(
                     new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
@@ -248,7 +248,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         try {
             var request = getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef()));
             var response = createErrorResponse(request, info);
-            gate.getHandler().onError(request, response);
+            gate.getHandler().onResponse( response);
         } catch (Throwable th) {
             gate.getHandler().onError(
                     new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));
@@ -261,7 +261,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
         try {
             var request = getRequestByOrderId(getOrderIdByOrderRef(rsp.getOrderRef()));
             var response = createErrorResponse(request, info);
-            gate.getHandler().onError(request, response);
+            gate.getHandler().onResponse(response);
         } catch (Throwable th) {
             gate.getHandler().onError(
                     new GatewayRuntimeException(GatewayStatus.INTERNAL_UNCAUGHT, th.getMessage()));

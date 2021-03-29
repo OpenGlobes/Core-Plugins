@@ -50,6 +50,7 @@ class CtpTraderGatewayTest {
     }
 
     @Test
+    @Disabled
     @Order(0)
     @DisplayName("ITraderGateway::start()")
     public void start() {
@@ -107,12 +108,6 @@ class CtpTraderGatewayTest {
                 @Override
                 public void onError(GatewayRuntimeException e) {
                     System.out.println(Utils.jsonify(e));
-                }
-
-                @Override
-                public void onError(Request request, Response response) {
-                    System.out.println(Utils.jsonify(request));
-                    System.out.println(Utils.jsonify(response));
                 }
 
                 @Override
