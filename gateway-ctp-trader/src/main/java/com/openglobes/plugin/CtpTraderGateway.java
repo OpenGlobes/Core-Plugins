@@ -44,11 +44,6 @@ public class CtpTraderGateway implements ITraderGateway, Runnable {
     }
 
     @Override
-    public int getStatus() {
-        return spi.getStatus();
-    }
-
-    @Override
     public void insert(Request request) {
         int i;
         try {
