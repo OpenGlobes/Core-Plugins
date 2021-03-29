@@ -76,7 +76,7 @@ public class AbstractCtpTraderSpi extends CThostFtdcTraderSpi {
     }
 
     void setPassword(String password) {
-        this.pwd = pwd;
+        this.pwd = password;
     }
 
     void setAppId(String appId) {
